@@ -34,24 +34,23 @@ def main():
         chunks = text_splitter.split_text(text)
         
         # st.write(chunks)
-        #create embeddings
+        #create embeddings - convert words into numbers and build a vector of connections(an object for similarity search and semantic search)
         embeddings = OpenAIEmbeddings()
         knowledge_base = FAISS.from_texts(chunks, embeddings)
 
         user_question = st.text_input("What do you want to know about from your PDF?")
         if user_question:
             docs = knowledge_base.similarity_search(user_question)
-
+            # st.write(docs)
             #chose a llm
             llm = OpenAI()
             chain = load_qa_chain(llm, chain_type="stuff")
-            with get_openai_callback as cb:
+            with get_openai_callback() as cb:
                 response = chain.run(input_documents=docs, question=user_question)
                 #track api token usage/spending
                 print(cb)
             
             st.write(response)
-
 
 if __name__ == '__main__':
     main()
